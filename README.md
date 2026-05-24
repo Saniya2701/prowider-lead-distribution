@@ -150,11 +150,6 @@ Ensures no duplicate leads per user per service.
 - Webhook idempotency design  
 - Scalable SaaS-style structure  
 
-<<<<<<< HEAD
-=======
- 
-
->>>>>>> 70ecae6 (Add Readme file)
 ---
 
 ## 📄 License
@@ -162,13 +157,12 @@ Ensures no duplicate leads per user per service.
 MIT
 
 ---
-<<<<<<< HEAD
-## 👨‍💻 Author
-
-**Saniya Mane**  
-=======
 
 ## 👨‍💻 Author
 
+**Saniya Mane** 
+
+## 👨‍💻 Author
+
 **Saniya Mane**  
->>>>>>> 70ecae6 (Add Readme file)
+
