@@ -6,15 +6,15 @@
 
 import mongoose from "mongoose";
 
-// 🚨 Prevent running on Vercel or production build
+// 🚨 Prevent running on Vercel / production build
 if (process.env.VERCEL || process.env.NODE_ENV === "production") {
   console.log("⛔ Seed script skipped in production environment");
   process.exit(0);
 }
 
-// ✅ Directly use environment variables (NO dotenv needed)
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// ❌ Safety check
 if (!MONGODB_URI) {
   console.error("❌ MONGODB_URI is not set in environment variables");
   process.exit(1);
@@ -24,10 +24,13 @@ async function seed() {
   const reset = process.argv.includes("--reset");
 
   console.log("🔌 Connecting to MongoDB...");
-  await mongoose.connect(MONGODB_URI);
+
+  // ✅ FIXED LINE (TypeScript-safe)
+  await mongoose.connect(MONGODB_URI!);
+
   console.log("✓ Connected");
 
-  // Lazy imports (after DB connection)
+  // Lazy imports after DB connection
   const { Provider } = await import("../src/lib/models/Provider");
   const { AllocationState } = await import("../src/lib/models/AllocationState");
   const { User } = await import("../src/lib/models/User");
