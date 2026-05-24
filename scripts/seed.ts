@@ -1,21 +1,22 @@
 #!/usr/bin/env tsx
 /**
- * Seed script: initializes 8 providers, allocation state, and admin user.
- * Usage:
- *   npm run seed          → idempotent insert (safe to re-run)
- *   npm run seed:reset    → drops collections first, then seeds
+ * Seed script: initializes providers, allocation state, and admin user.
+ * Safe for local use only (NOT executed in production build).
  */
 
 import mongoose from "mongoose";
-import * as dotenv from "dotenv";
-import path from "path";
 
-dotenv.config({ path: path.join(__dirname, "../.env") });
-dotenv.config({ path: path.join(__dirname, "../.env.local") });
+// 🚨 Prevent running on Vercel or production build
+if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+  console.log("⛔ Seed script skipped in production environment");
+  process.exit(0);
+}
 
+// ✅ Directly use environment variables (NO dotenv needed)
 const MONGODB_URI = process.env.MONGODB_URI;
+
 if (!MONGODB_URI) {
-  console.error("❌ MONGODB_URI is not set in .env");
+  console.error("❌ MONGODB_URI is not set in environment variables");
   process.exit(1);
 }
 
@@ -23,23 +24,24 @@ async function seed() {
   const reset = process.argv.includes("--reset");
 
   console.log("🔌 Connecting to MongoDB...");
-  await mongoose.connect(MONGODB_URI!);
+  await mongoose.connect(MONGODB_URI);
   console.log("✓ Connected");
 
-  // Lazy import models after connection
+  // Lazy imports (after DB connection)
   const { Provider } = await import("../src/lib/models/Provider");
   const { AllocationState } = await import("../src/lib/models/AllocationState");
   const { User } = await import("../src/lib/models/User");
 
+  // ── RESET DATA ─────────────────────────────────────────────
   if (reset) {
-    console.log("🗑️  Dropping existing data...");
+    console.log("🗑️ Dropping existing data...");
     await Provider.deleteMany({});
     await AllocationState.deleteMany({});
     await User.deleteMany({ role: "admin" });
     console.log("✓ Collections cleared");
   }
 
-  // ── PROVIDERS ────────────────────────────────────────────────────────────────
+  // ── PROVIDERS ─────────────────────────────────────────────
   const providerData = [
     {
       providerNumber: 1,
@@ -112,23 +114,27 @@ async function seed() {
 
   for (const p of providerData) {
     const exists = await Provider.findOne({ providerNumber: p.providerNumber });
+
     if (exists) {
-      console.log(`  ↳ P${p.providerNumber} already exists — skipping`);
+      console.log(`↳ P${p.providerNumber} already exists — skipping`);
       skipped++;
       continue;
     }
+
     await Provider.create({
       ...p,
       monthlyQuota: 10,
       usedQuota: 0,
       isActive: true,
     });
-    console.log(`  ✓ Created P${p.providerNumber}: ${p.name}`);
+
+    console.log(`✓ Created P${p.providerNumber}: ${p.name}`);
     created++;
   }
+
   console.log(`Providers: ${created} created, ${skipped} skipped\n`);
 
-  // ── ALLOCATION STATE ─────────────────────────────────────────────────────────
+  // ── ALLOCATION STATE ──────────────────────────────────────
   const allocationData = [
     {
       serviceType: "Service 1",
@@ -148,33 +154,44 @@ async function seed() {
   ];
 
   for (const a of allocationData) {
-    const exists = await AllocationState.findOne({ serviceType: a.serviceType });
+    const exists = await AllocationState.findOne({
+      serviceType: a.serviceType,
+    });
+
     if (exists) {
-      console.log(`  ↳ AllocationState for ${a.serviceType} already exists — skipping`);
+      console.log(`↳ AllocationState for ${a.serviceType} exists — skipping`);
       continue;
     }
+
     await AllocationState.create(a);
-    console.log(`  ✓ AllocationState for ${a.serviceType} (pool: [${a.poolProviders}])`);
+    console.log(`✓ AllocationState created for ${a.serviceType}`);
   }
 
-  // ── ADMIN USER ───────────────────────────────────────────────────────────────
+  // ── ADMIN USER ────────────────────────────────────────────
   const adminEmail = process.env.ADMIN_EMAIL || "admin@prowider.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "Admin@123";
 
   const adminExists = await User.findOne({ email: adminEmail });
+
   if (!adminExists) {
-    await User.create({ email: adminEmail, password: adminPassword, role: "admin" });
-    console.log(`\n  ✓ Admin user created: ${adminEmail}`);
+    await User.create({
+      email: adminEmail,
+      password: adminPassword,
+      role: "admin",
+    });
+
+    console.log(`✓ Admin created: ${adminEmail}`);
   } else {
-    console.log(`\n  ↳ Admin user already exists: ${adminEmail}`);
+    console.log(`↳ Admin already exists`);
   }
 
   console.log("\n✅ Seed complete!");
-  console.log(`\n🔑 Login: ${adminEmail} / ${adminPassword}`);
+  console.log(`Login: ${adminEmail} / ${adminPassword}`);
+
   await mongoose.disconnect();
 }
 
-seed().catch((e) => {
-  console.error("❌ Seed failed:", e);
+seed().catch((err) => {
+  console.error("❌ Seed failed:", err);
   process.exit(1);
 });
