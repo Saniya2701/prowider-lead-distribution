@@ -162,7 +162,5 @@ MIT
 
 **Saniya Mane** 
 
-## 👨‍💻 Author
 
-**Saniya Mane**  
 
