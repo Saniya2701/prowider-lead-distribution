@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #0ea5e9;
+  --brand-dark: #0369a1;
+  --surface: #0f172a;
+  --surface-50: #1e293b;
+  --surface-100: #334155;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: radial-gradient(ellipse at 20% 0%, #0f2744 0%, #0f172a 60%);
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0f172a; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+}
+
+@layer components {
+  .card {
+    @apply bg-slate-900/70 backdrop-blur-sm border border-slate-800 rounded-xl;
+  }
+
+  .btn-primary {
+    @apply bg-sky-500 hover:bg-sky-400 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-4 py-2 rounded-lg transition-all duration-200 border border-slate-700;
+  }
+
+  .btn-danger {
+    @apply bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold px-4 py-2 rounded-lg transition-all duration-200 border border-red-500/30;
+  }
+
+  .input-field {
+    @apply w-full bg-slate-800/80 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-400 mb-1.5;
+  }
+
+  .badge-service1 {
+    @apply bg-sky-500/20 text-sky-300 border border-sky-500/30;
+  }
+  .badge-service2 {
+    @apply bg-violet-500/20 text-violet-300 border border-violet-500/30;
+  }
+  .badge-service3 {
+    @apply bg-emerald-500/20 text-emerald-300 border border-emerald-500/30;
+  }
+  .badge-mandatory {
+    @apply bg-amber-500/20 text-amber-300 border border-amber-500/30;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
